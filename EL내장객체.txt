@@ -1,0 +1,18 @@
+영역담당객체
+1. page 영역 : pageContext
+2. reqeust 영역 : request
+3. session 영역  : session
+4. application 영역 : application
+
+-- 영역담당 객체에서 사용가능한 속성 관련 메서드
+ setAttribute : 속성등록
+ getAttribute : 속성조회
+ removeAttribute : 속성제거
+
+-- EL
+  pageScope : pageContext에 등록된 속성값조회
+  requestScope : request에 등록된 속성값조회
+  sessionScope : session에 등록된 속성값조회
+  applicationScope : application에 등록된 속성값조회
+  param : 파라미터값 조회
+  paramValues : 파라미터값들 조회
