@@ -15,6 +15,17 @@
 <fmt:parseNumber value="10,000" var="num2" pattern="##,###" />
 합:${num1} + ${num2} = ${num1+num2}<br>
 문제 : 합:20,000 + 10,000 = 30,000 출력하기<br>
+<fmt:formatNumber value="${num1}" var="snum1" pattern="##,###" /> 
+<fmt:formatNumber value="${num2}" var="snum2" pattern="##,###" />  
+<fmt:formatNumber value="${num1+num2}" var="snum3" pattern="##,###" />
+${snum1}+${snum2} = ${snum3} <br>
 
+<h3>Format 된 문자열형 날짜를 날짜형으로 변경</h3>
+<fmt:parseDate value="2023-12-25 12:00:00" 
+   pattern="yyyy-MM-dd HH:mm:ss" var="day" />
+${day} <br>  
+<%-- 2023-12-25의 요일만 출력하기 --%>
+<fmt:formatDate value="${day}" pattern="E요일" var="week"/>
+${week}
 </body>
 </html>
