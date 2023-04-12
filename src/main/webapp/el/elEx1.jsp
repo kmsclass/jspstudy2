@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>    
 <%-- /jspstudy2/src/main/webapp/el/elEx1.jsp --%>    
 <!DOCTYPE html>
 <html>
@@ -7,8 +8,9 @@
 <meta charset="UTF-8">
 <title>elForm.jsp의 결과 화면</title>
 </head><body>
+<fmt:requestEncoding value="UTF-8"/>
 <%
-   request.setCharacterEncoding("UTF-8");
+//   request.setCharacterEncoding("UTF-8");
    String tel = "010-1111-2222";
    String tel1 = "010-1111-3333";
    pageContext.setAttribute("tel", tel);

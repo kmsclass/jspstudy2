@@ -14,7 +14,7 @@
   y:<input type="text" name="y" value="${param.y}">
    <input type="submit" value="더하기">  
 </form>
-합계 : <c:out value="${param.x + param.y}" />
+합계 : <c:out value="${param.x + param.y}" />,${param.x + param.y}
 
 <h3>if 태그를 이용하여 출력하기</h3>
 <c:if test="${param.x + param.y > 0}">
