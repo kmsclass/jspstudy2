@@ -47,17 +47,20 @@
 <div class="container">
    <h2 id="center">회원가입</h2>
    <div class="row">
-      <div class="col-3 bg-light">
-         <img src="" width="100" height="120" id="pic">
+      <div class="col-3 bg-light" id="center">
+         <img src="" width="95%" height="200" id="pic"><br>
+      <font size="1"><a href="javascript:win_upload()">사진등록</a></font>
       </div>
       <div class="col-9">
          <div class="form-group">
-          <label for="id">아이디:</label><input type="text"
-          class="form-control" name="id" id="id">
+          <label for="id">아이디:</label>
+          <button type="button" class="btn btn-dark float-right"
+             onclick="idchk()">중복체크</button>
+          <input type="text" class="form-control" name="id" id="id">
           <label for="pwd">비밀번호:</label><input type="password"
           class="form-control" name="pass" id="pwd">
           <label for="name">이름:</label><input type="text"
-          class="form-control" name="name" id="name">
+          class="form-control" name="name" id="name"><br>
           <label for="gender">성별:</label>
           <label class="radio-inline"></label><input type="radio"
           name="gender" checked value="1">남<label class="radio-inline"></label>

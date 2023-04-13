@@ -1,11 +1,16 @@
 package controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.oreilly.servlet.MultipartRequest;
 
 import gdu.mskim.MSLogin;
 import gdu.mskim.MskimRequestMapping;
@@ -19,10 +24,30 @@ import model.MemberDao;
    initParams= {@WebInitParam(name="view",value="/view/")})
 public class MemberController extends MskimRequestMapping{
 	private MemberDao dao = new MemberDao();
-	
+//===================================================	
+	public String loginCheck(HttpServletRequest request,
+			HttpServletResponse response) {
+		try {
+			request.setCharacterEncoding("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		String login=(String)request.getSession().getAttribute("login");
+		if(login==null) {
+			request.setAttribute("msg", "로그인 하세요");
+			request.setAttribute("url", "loginForm");
+			return "alert";
+		}
+		return null;
+	}
 	//로그인 검증. id파라미터와 로그인정보 검증
 	public String loginIdCheck(HttpServletRequest request,
 			HttpServletResponse response) {
+		try {
+			request.setCharacterEncoding("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		String id = request.getParameter("id");
 		String login=(String)request.getSession().getAttribute("login");
 		if(login==null) {
@@ -36,6 +61,21 @@ public class MemberController extends MskimRequestMapping{
 		}
 		return null;
 	}
+	public String loginAdminCheck(HttpServletRequest request,
+			HttpServletResponse response) {
+		String login=(String)request.getSession().getAttribute("login");
+		if(login==null) {
+			request.setAttribute("msg", "로그인 하세요");
+			request.setAttribute("url", "loginForm");
+			return "alert";
+		} else if (!login.equals("admin")) {
+			request.setAttribute("msg", "관리자만 거래 가능합니다.");
+			request.setAttribute("url", "main");
+			return "alert";			
+		}
+		return null;
+	}
+//=======================================================	
 	//http://localhost:8080/jspstudy2/member/loginForm
 	@RequestMapping("loginForm")
 	public String loginForm(HttpServletRequest request,
@@ -245,37 +285,216 @@ public class MemberController extends MskimRequestMapping{
 	  String login =(String)request.getSession().getAttribute("login");
 	  String msg = null;
 	  String url = null;
-	  if (id.equals("admin")) {
-		  request.setAttribute("msg", msg);
-		  request.setAttribute("url", url);
+	  if (id.equals("admin")) {  //
+		  request.setAttribute("msg", "관리자는 탈퇴 못합니다.");
+		  request.setAttribute("url", "list");
 		  return "alert";
 	  }
 	  MemberDao dao = new MemberDao();
-	  Member dbMem = dao.selectOne(login);
+	  Member dbMem = dao.selectOne(login); //로그인된 사용자의 비밀번호로 검증
 	  if(!pass.equals(dbMem.getPass())) {
 	  	  request.setAttribute("msg", "비밀번호 오류"); 
 	  	  request.setAttribute("url", "deleteForm?id="+id);
 	  	  return  "alert";
 	  }
-	  if(dao.delete(id)) {
+	  //비밀번호 일치=>고객정보삭제
+	  if(dao.delete(id)) {  //삭제 성공
 		msg=id +"고객님 탈퇴성공";
-	   	if(login.equals("admin")) {
-	   	  url = "list";
-	   	} else {
-	   	  request.getSession().invalidate();
+	   	if(login.equals("admin"))   url = "list";
+	   	else {  //일반사용자
+	   	  request.getSession().invalidate(); //로그아웃
 	   	  url = "loginForm";
 	   	}
-     } else {
+     } else {  //삭제 실패
 		msg=id +"고객님 탈퇴시 오류 발생. 탈퇴 실패";
-	   	if(login.equals("admin")) {
-	   	  url = "list";
-	   	} else {
-	   	  url = "info?id="+id;
-	   	}
+	   	if(login.equals("admin"))   url = "list";
+	   	else                        url = "info?id="+id;
 	 }
 	 request.setAttribute("msg", msg);
 	 request.setAttribute("url", url);
      return "alert";
+   }
+	/*
+  1. 관리자만 사용가능 페이지=> 검증
+    - 로그아웃상태 : 로그인이 필요합니다. 메세지 출력. loginForm.jsp 페이지이동
+    - 로그인 상태 : 일반사용자 로그인시 "관리자만 가능합니다." 메세지 출력 main.jsp 페이지 이동\
+  2. db에서 모든 회원정보를 조회. List<Member> 객체로 리턴
+      List<Member> MemberDao.list()
+  3. list 화면 전달 	  
+	 */
+   @RequestMapping("list")
+   @MSLogin("loginAdminCheck")
+   public String list(HttpServletRequest request,
+		   HttpServletResponse response) {
+	   List<Member> list = dao.list();
+	   request.setAttribute("list", list);
+	   return "member/list";
+   }
+   /*
+   1. 이미지파일 업로드. request 객체 사용 불가
+           이미지파일 업로드의 위치 : 현재URL/picture 폴더로 설정
+   2. opener 화면에 결과 전달 =>javascript
+   3. 현재 화면 close() =>javascript
+    */
+   @RequestMapping("picture")
+   public String picture(HttpServletRequest request,
+		   HttpServletResponse response) {
+	   //request.getServletContext() : application 객체
+	   //request.getServletContext().getRealPath("/") 
+	   //  : 실제 웹어플리케이션 경로.
+	   String path = request.getServletContext().getRealPath("/") 
+			             + "/picture/";
+	   String fname = null;
+	   File f = new File(path);
+	   if(!f.exists()) {   f.mkdirs();   }  //업로드 폴더가 없는 경우 폴더 생성
+	   MultipartRequest multi=null;
+	   try {
+		   //request : 요청객체. 파라미터,파일의내용,파일이름
+		   //path    : 업로드된 파일이 저장될 폴더
+		   //10*1024*1024 : 업로드 파일의 최대 크기 바이트수. 10MB최대크기
+		   //utf-8    : 인코딩 코드
+		multi = new MultipartRequest(request,path,10*1024*1024,"utf-8");
+	   } catch (IOException e) {
+		  e.printStackTrace();
+	   }
+	   //fname : 업로드된 파일 이름
+	   fname = multi.getFilesystemName("picture"); //업로드된 파일의 이름
+	   request.setAttribute("fname", fname);
+	   return "member/picture";
+   }
+   /*
+    */
+   @RequestMapping("idchk")
+   public String idchk(HttpServletRequest request,
+			   HttpServletResponse response) {
+		String id= request.getParameter("id");
+	    Member mem = new MemberDao().selectOne(id);
+	    String msg = null;
+	    boolean able = true; 
+		if(mem == null) {
+			msg = "사용가능한 아이디 입니다.";
+		} else {
+			msg = "사용 중인 아이디 입니다.";
+		    able = false;
+		}
+	    request.setAttribute("able", able);
+	    request.setAttribute("msg", msg);
+	    return "member/idchk";
+   }
+   /*
+   1. 파라미터값 저장(email,tel)
+   2. db에서 두개의 파라미터를 이용하여 id값 리턴해주는 함수
+      id MemberDao.idSearch(email,tel)
+   3. id 검증
+       -id 존재 :화면에 뒤쪽 2자만 ** 표시하여 화면에 출력하기.
+                아이디전송 버튼을 클릭하면 opener 윈도우에 id값 전달. 현재 화면 닫기
+       -id 없음 : id가 없습니다. 메세지 출력후 현재화면을 idForm.jsp 페이지 이동     */
+   @RequestMapping("id")
+   public String id(HttpServletRequest request,
+			   HttpServletResponse response) {
+	   String email = request.getParameter("email");
+	   String tel = request.getParameter("tel");
+	   MemberDao dao = new MemberDao();
+	   String id = dao.idSearch(email,tel); 
+	   if(id != null) { //id 찾은 경우   
+		   String showId = id.substring(0,id.length()-2);
+		   request.setAttribute("id", showId);
+		   return "member/id";
+	   } else {
+		   request.setAttribute("msg", "아이디를 찾을 수 없습니다.");
+		   request.setAttribute("url", "idForm");
+		   return "alert";
+	   }
+   }
+   /*
+  1. 파라미터 저장.
+  2. db에서 id,email과 tel 을 이용하여 pass값을 리턴
+       pass = MemberDao.pwSearch(id,email,tel)
+  3. 비밀번호 검증 
+     비밀번호 찾은 경우 :화면에 앞 두자리는 **로 표시하여 화면에 출력. 닫기버튼 클릭시 
+                     현재 화면 닫기
+     비밀번호 못찾은 경우: 정보에 맞는 비밀번호를 찾을 수 없습니다.  메세지 출력후
+                     현재 페이지를 pwForm.jsp로 페이지 이동. 
+    */
+   @RequestMapping("pw")
+   public String pw(HttpServletRequest request,
+			   HttpServletResponse response) {
+	   String id = request.getParameter("id");
+	   String email = request.getParameter("email");
+	   String tel = request.getParameter("tel");
+	   MemberDao dao = new MemberDao();
+	   String pass = dao.pwSearch(id,email,tel);
+	   if(pass != null) {
+		   request.setAttribute("pass", pass.substring(2,pass.length()));
+	       return "member/pw";
+	   } else {
+		   request.setAttribute("msg", "비밀번호를 찾을 수 없습니다.");
+		   request.setAttribute("url", "pwForm");
+		   return "alert";
+	   }
+   }
+   @RequestMapping("passwordForm")
+   @MSLogin("loginCheck")
+   public String passwordForm(HttpServletRequest request,
+		   HttpServletResponse response) {
+	   return "member/passwordForm";
+   }
+
+   /*
+   1. 파라미터 저장 (pass,chgpass)
+   2. 로그인한 사용자의 비밀번호 변경만 가능.=> 로그인부분 검증
+      로그아웃상태 : 로그인 하세요 메세지 출력후 
+                  opener 창을 loginForm.jsp 페이지로 이동. 현재페이지 닫기
+   3. 비밀번호 검증 : 현재비밀번호로 비교
+      비밀번호 오류 : 비밀번호 오류 메세지 출력 후 현재페이지를 passwordForm.jsp로 이동                
+   4. db에 비밀번호 수정
+       boolean MemberDao.updatePass(id,변경비밀번호)
+       - 수정성공 : 성공메세지 출력 후
+                  (로그아웃되었습니다. 변경된 비밀번호로 다시로그인 하세요) 
+                // opener 페이지 info.jsp로 이동.현재 페이지 닫기
+                  로그아웃 후 opener 페이지 loginForm.jsp로 이동.현재 페이지 닫기     
+       - 수정실패 : 실패메세지 출력 후 opener 페이지 updateForm.jsp로 이동.
+                  현재 페이지 닫기      
+    */
+   @RequestMapping("password")
+   public String password(HttpServletRequest request,
+		   HttpServletResponse response) {
+	   String pass = request.getParameter("pass");
+	   String chgpass = request.getParameter("chgpass");
+	   String login = (String)request.getSession().getAttribute("login");
+	   String msg = null;
+	   String url = null;
+	   boolean opener = true;
+	   if(login == null) {
+		   msg = "로그인하세요";
+		   url = "loginForm.jsp";
+		   opener = true;
+	   } else { 
+		   MemberDao dao = new MemberDao();
+		   Member dbmem = dao.selectOne(login);
+		   if(pass.equals(dbmem.getPass())) {
+			   if(dao.updatePass(login,chgpass)) {
+//				   msg = "비밀번호가 변경되었습니다";
+//				   url = "info.jsp?id=" + login;
+	               msg = "비밀번호가 변경되었습니다 \\n  다시로그인 하세요";
+	  	           request.getSession().invalidate();
+	  	           url = "loginForm";
+				   opener = true;
+			   } else {
+				   msg = "비밀번호가 변경시 오류발생";
+				   url = "updateForm?id=" + login;
+				   opener = true;
+			   }
+		   } else {  //비밀번호 오류
+			 opener = false;
+		     msg = "비밀번호 오류입니다.";
+		     url = "passwordForm";
+		   }
+	   }
+	   request.setAttribute("msg", msg);
+	   request.setAttribute("url", url);
+	   request.setAttribute("opener", opener);
+	   return "member/password";
    }
 }
 

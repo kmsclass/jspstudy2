@@ -13,7 +13,7 @@ public class BookDao {
 		PreparedStatement pstmt = null;
 		try {
 		 pstmt = conn.prepareStatement
-				("insert into book (writer,title,content) values(?,?,?)");
+		("insert into book (writer,title,content) values(?,?,?)");
 		 pstmt.setString(1, book.getWriter());
 		 pstmt.setString(2, book.getTitle());
 		 pstmt.setString(3, book.getContent());
