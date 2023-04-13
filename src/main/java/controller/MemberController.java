@@ -236,5 +236,46 @@ public class MemberController extends MskimRequestMapping{
          - 일반사용자 : 탈퇴 실패 메세지 출력 후 info로 페이지 이동 
          - 관리자    : 탈퇴 실패 메세지 출력 후 list로 페이지 이동 
  */
+	@RequestMapping("delete")
+	@MSLogin("loginIdCheck")
+	public String delete(HttpServletRequest request,
+			HttpServletResponse response) {
+	  String id = request.getParameter("id");
+	  String pass = request.getParameter("pass");
+	  String login =(String)request.getSession().getAttribute("login");
+	  String msg = null;
+	  String url = null;
+	  if (id.equals("admin")) {
+		  request.setAttribute("msg", msg);
+		  request.setAttribute("url", url);
+		  return "alert";
+	  }
+	  MemberDao dao = new MemberDao();
+	  Member dbMem = dao.selectOne(login);
+	  if(!pass.equals(dbMem.getPass())) {
+	  	  request.setAttribute("msg", "비밀번호 오류"); 
+	  	  request.setAttribute("url", "deleteForm?id="+id);
+	  	  return  "alert";
+	  }
+	  if(dao.delete(id)) {
+		msg=id +"고객님 탈퇴성공";
+	   	if(login.equals("admin")) {
+	   	  url = "list";
+	   	} else {
+	   	  request.getSession().invalidate();
+	   	  url = "loginForm";
+	   	}
+     } else {
+		msg=id +"고객님 탈퇴시 오류 발생. 탈퇴 실패";
+	   	if(login.equals("admin")) {
+	   	  url = "list";
+	   	} else {
+	   	  url = "info?id="+id;
+	   	}
+	 }
+	 request.setAttribute("msg", msg);
+	 request.setAttribute("url", url);
+     return "alert";
+   }
 }
 

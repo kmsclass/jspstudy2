@@ -2,4 +2,4 @@
    testForm.jsp, test1.jsp 를 모델2로 변경하기
    Controller : BookController.java 생성하기
    Model      : BookDao.java, Book.java 파일 이용하기
-   View       : testForm.jsp, test.jsp  페이지 수정하기
+   View       : testForm.jsp, test1.jsp  페이지 수정하기

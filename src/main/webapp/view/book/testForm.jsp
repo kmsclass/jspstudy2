@@ -27,7 +27,7 @@
 </script>
 </head>
 <body>
-<form action="test1.jsp" method="post" 
+<form action="test1" method="post" 
       onsubmit="return inputcheck(this)">
 <table><caption>방명록쓰기</caption>
 <tr><td>방문자</td><td><input type="text" name="writer"></td></tr>
