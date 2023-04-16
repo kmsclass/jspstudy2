@@ -28,6 +28,7 @@ public class SiteMeshFilter extends ConfigurableSiteMeshFilter {
 	  .addExcludedPath("/member/picture*");
 	  
 	  builder.addDecoratorPath("/board/*","/layout/boardlayout.jsp");
+	  builder.addDecoratorPath("/book/*","/layout/booklayout.jsp");
 	  
 	}
 }

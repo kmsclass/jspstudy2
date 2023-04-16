@@ -37,11 +37,10 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
 <!-- Sidebar/menu -->
 <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
-  <div class="w3-container w3-row">
-    <div class="w3-col s4">
+  <div class="w3-container w3-center">
+    <div class="w3-row w3-margin-top">
       <img src="${path }/image/logo.gif" 
       class="w3-circle w3-margin-right" style="width:100px">
-    </div>
   </div>
   <div class="w3-row w3-margin-top">
      <c:if test="${!empty sessionScope.login }">
@@ -50,6 +49,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
      <c:if test="${empty sessionScope.login }">
       <span></span><strong>로그인하세요</strong></span>
      </c:if>
+  </div>
   </div>
   <hr>
   <div class="w3-bar-block">
