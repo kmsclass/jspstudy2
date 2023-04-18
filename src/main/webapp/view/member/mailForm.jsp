@@ -44,7 +44,8 @@ value="<c:forEach items="${list}" var="m" >${m.name} &lt;${m.email}&gt;,</c:forE
 		<option value="text/plain;charset=UTF-8">TEXT
 	</select></td></tr>
 <tr><td colspan="2">
-<textarea name="content" cols="40" rows="10" class="form-control"></textarea></td>
+<textarea name="content" cols="40" rows="10" class="form-control" id="content"></textarea></td>
+<script>CKEDITOR.replace("content")</script>
 </tr><tr><td colspan="2" id="center">
 	  <button type="submit" class="btn btn-dark">전송</button></td>
 </table></form></div></BODY></HTML>

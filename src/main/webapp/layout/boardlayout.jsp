@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-    
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <c:set var="path" value="${pageContext.request.contextPath}" />
-    
+<c:set var="uri" value="${pageContext.request.servletPath}" />
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,6 +16,8 @@
 <style>
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 </style>
+<script type="text/javascript"
+  src="http://cdn.ckeditor.com/4.5.7/full/ckeditor.js"></script>
 <sitemesh:write property="head"/>
 </head>
 <body class="w3-light-grey">
@@ -54,18 +56,19 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <hr>
   <div class="w3-bar-block">
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>&nbsp; Close Menu</a>
-    <a href="${path}/member/main" class="w3-bar-item w3-button w3-padding w3-blue">
+    <a href="${path}/member/main" 
+       class="w3-bar-item w3-button w3-padding ">
     <i class="fa fa-users fa-fw"></i>&nbsp; 회원관리</a>
     <a href="${path}/board/list?boardid=1" 
-      class="w3-bar-item w3-button w3-padding">
+      class="w3-bar-item w3-button w3-padding <c:if test='${empty boardid || boardid==1}'>w3-blue</c:if>">
       <i class="fa fa-eye fa-fw"></i>&nbsp; 공지사항</a>
       
     <a href="${path}/board/list?boardid=2" 
-      class="w3-bar-item w3-button w3-padding">
+      class="w3-bar-item w3-button w3-padding  <c:if test='${boardid==2}'>w3-blue</c:if>">
     <i class="fa fa-users fa-fw"></i>&nbsp; 자유게시판</a>
     
     <a href="${path}/board/list?boardid=3" 
-    class="w3-bar-item w3-button w3-padding">
+    class="w3-bar-item w3-button w3-padding <c:if test='${boardid==3}'>w3-blue</c:if>">
     <i class="fa fa-bullseye fa-fw"></i>&nbsp;QNA</a>
   </div>
 </nav>

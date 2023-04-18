@@ -15,6 +15,7 @@ public class Board {
 	private int grp;
 	private int grplevel;
 	private int grpstep;
+	private int commcnt;
 
 	// getter, setter, toString
 	public int getNum() {
@@ -111,6 +112,15 @@ public class Board {
 
 	public void setGrpstep(int grpstep) {
 		this.grpstep = grpstep;
+	}
+
+	
+	public int getCommcnt() {
+		return commcnt;
+	}
+
+	public void setCommcnt(int commcnt) {
+		this.commcnt = commcnt;
 	}
 
 	@Override

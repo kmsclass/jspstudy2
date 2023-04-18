@@ -49,7 +49,8 @@ public class BookController extends MskimRequestMapping{
 			HttpServletResponse response ) {
 	    List<Book> list = dao.list();  
 	    request.setAttribute("list",list);
-        return "book/testlist";
+        return "book/testlist";  // /view/book/testlist.jsp 뷰로 설정
 	}
+	
 	
 }

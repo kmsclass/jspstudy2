@@ -94,6 +94,7 @@ public class MemberController extends MskimRequestMapping{
 	@RequestMapping("loginForm")
 	public String loginForm(HttpServletRequest request,
 			HttpServletResponse response) {
+		request.setAttribute("uri", request.getRequestURI());
 		return "member/loginForm"; //view 선택 
 		//  /view/member/loginForm.jsp => view 이름
 	}
