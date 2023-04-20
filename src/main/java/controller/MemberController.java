@@ -30,14 +30,14 @@ import gdu.mskim.MSLogin;
 import gdu.mskim.MskimRequestMapping;
 import gdu.mskim.RequestMapping;
 import model.Member;
-import model.MemberDao;
+import model.MemberMybatisDao;
 //  /member/* => http://localhost:8080/jspstudy2/member/이후의 어떤 요청이
 //               들어와도 MemberController 서블릿이 호출됨.
 // /view/ =>  /jspstudy2/src/main/webapp/view/ 폴더
 @WebServlet(urlPatterns= {"/member/*"},
    initParams= {@WebInitParam(name="view",value="/view/")})
 public class MemberController extends MskimRequestMapping{
-	private MemberDao dao = new MemberDao();
+	private MemberMybatisDao dao = new MemberMybatisDao();
 //===================================================	
 	public String loginCheck(HttpServletRequest request,
 			HttpServletResponse response) {
@@ -305,7 +305,6 @@ public class MemberController extends MskimRequestMapping{
 		  request.setAttribute("url", "list");
 		  return "alert";
 	  }
-	  MemberDao dao = new MemberDao();
 	  Member dbMem = dao.selectOne(login); //로그인된 사용자의 비밀번호로 검증
 	  if(!pass.equals(dbMem.getPass())) {
 	  	  request.setAttribute("msg", "비밀번호 오류"); 
@@ -383,7 +382,7 @@ public class MemberController extends MskimRequestMapping{
    public String idchk(HttpServletRequest request,
 			   HttpServletResponse response) {
 		String id= request.getParameter("id");
-	    Member mem = new MemberDao().selectOne(id);
+	    Member mem = dao.selectOne(id);
 	    String msg = null;
 	    boolean able = true; 
 		if(mem == null) {
@@ -409,7 +408,6 @@ public class MemberController extends MskimRequestMapping{
 			   HttpServletResponse response) {
 	   String email = request.getParameter("email");
 	   String tel = request.getParameter("tel");
-	   MemberDao dao = new MemberDao();
 	   String id = dao.idSearch(email,tel); 
 	   if(id != null) { //id 찾은 경우   
 		   String showId = id.substring(0,id.length()-2);
@@ -437,7 +435,6 @@ public class MemberController extends MskimRequestMapping{
 	   String id = request.getParameter("id");
 	   String email = request.getParameter("email");
 	   String tel = request.getParameter("tel");
-	   MemberDao dao = new MemberDao();
 	   String pass = dao.pwSearch(id,email,tel);
 	   if(pass != null) {
 		   request.setAttribute("pass", pass.substring(2,pass.length()));
@@ -485,7 +482,6 @@ public class MemberController extends MskimRequestMapping{
 		   url = "loginForm";
 		   opener = true;
 	   } else { //로그인 상태
-		   MemberDao dao = new MemberDao();
 		   Member dbmem = dao.selectOne(login);
 		   if(pass.equals(dbmem.getPass())) { //비밀번호 일치
 			   if(dao.updatePass(login,chgpass)) { //db에 비밀번호 수정

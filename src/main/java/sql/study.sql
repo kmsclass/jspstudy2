@@ -52,3 +52,5 @@ create table comment (
    primary key (num,seq)
 )
 select * from comment
+
+select * from student

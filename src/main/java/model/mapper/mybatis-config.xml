@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--  /jspstudy2/src/main/java/model/mapper/mybatis-config.xml -->
+<!DOCTYPE configuration PUBLIC "-//mybatis.org/DTD config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  <properties resource="model/mapper/mybatis.properties" />
+  
+  <!-- Connection 객체  -->
+  <environments default="development">
+    <environment id="development">
+      <transactionManager type="JDBC" />
+      <dataSource type="POOLED" >
+         <property name="driver" value="${driver}"/>
+         <property name="url" value="${url}"/>
+         <property name="username" value="${username}"/>
+         <property name="password" value="${password}"/>
+      </dataSource>
+    </environment>
+  </environments>
+  <!--  sql 구문을 가진 파일 목록 -->
+  <mappers>
+    <!-- model.mapper 패키지의 인터페이스들을 sql 구문으로 등록 -->
+    <package name="model.mapper"/>  
+  </mappers>
+</configuration>
