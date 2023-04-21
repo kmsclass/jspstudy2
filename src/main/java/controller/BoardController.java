@@ -16,14 +16,14 @@ import com.oreilly.servlet.MultipartRequest;
 import gdu.mskim.MskimRequestMapping;
 import gdu.mskim.RequestMapping;
 import model.Board;
-import model.BoardDao;
+import model.BoardMybatisDao;
 import model.Comment;
 import model.CommentDao;
 //http://localhost:8080/jspstudy2/board/writeForm
 @WebServlet(urlPatterns= {"/board/*"},
 initParams= {@WebInitParam(name="view",value="/view/")})
 public class BoardController extends MskimRequestMapping {
-	private BoardDao dao = new BoardDao();
+	private BoardMybatisDao dao = new BoardMybatisDao();
 	private CommentDao cdao = new CommentDao();
 	@RequestMapping("writeForm")
 	public String writeForm(HttpServletRequest request,
@@ -96,43 +96,59 @@ public class BoardController extends MskimRequestMapping {
 	@RequestMapping("list")
 	public String list(HttpServletRequest request ,
 			HttpServletResponse response) {
+		try {
+			request.setCharacterEncoding("UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
 		if (request.getParameter("boardid") != null) {
-			  //session에 게시판 종류 정보 등록	
-			  request.getSession().setAttribute("boardid",request.getParameter("boardid"));
-			  request.getSession().setAttribute("pageNum", "1"); //현재페이지 번호
-		 	}
-			String boardid = 
+		  //session에 게시판 종류 정보 등록	
+		  request.getSession().setAttribute("boardid",request.getParameter("boardid"));
+		  request.getSession().setAttribute("pageNum", "1"); //현재페이지 번호
+	 	}
+		String boardid = 
 				(String)request.getSession().getAttribute("boardid");
-			if (boardid == null) boardid = "1"; 
-			int pageNum = 1;
-		    try {
-			   pageNum = Integer.parseInt(request.getParameter("pageNum"));
-		    } catch (NumberFormatException e) {}
-		    
-		    int limit = 10;  //한페이지에 보여질 게시물 건수
-		    BoardDao dao = new BoardDao();
-		    //boardcount : 게시물종류별 게시물 등록건수
-		    int boardcount = dao.boardCount(boardid); //게시판 종류별 전체 게시물등록 건수 리턴
-		    //list : 현재 페이지에 보여질 게시물 목록. 
-		    List<Board> list = dao.list(boardid,pageNum,limit);
-		    
-		    /*
-		       maxpage:필요한 페이지 갯수.
-		       게시물건수  필요한 페이지
-		          3        1
-		               3.0/10 => 0.3+0.95=>(int)1.25 => 1
-		         10        1
+		if (boardid == null) boardid = "1"; 
+		int pageNum = 1;
+	    try {
+		   pageNum = Integer.parseInt(request.getParameter("pageNum"));
+	    } catch (NumberFormatException e) {}
+	    String column = request.getParameter("column");
+	    String find = request.getParameter("find");
+	    /*
+	     * column,find 파라미터 중 한개만 존재하는 경우 두개의 파라미터값은
+	     * 없는 상태로 설정
+	     */
+	    if(column == null || column.trim().equals("")) {
+	    	column = null;
+	    	find = null;
+	    }
+	    if(find == null || find.trim().equals("")) {
+	    	column = null;
+	    	find = null;
+	    }
+	    int limit = 10;  //한페이지에 보여질 게시물 건수
+		//boardcount : 게시물종류별 게시물 등록건수
+		int boardcount = dao.boardCount(boardid,column,find); //게시판 종류별 전체 게시물등록 건수 리턴
+		//list : 현재 페이지에 보여질 게시물 목록. 
+		List<Board> list = dao.list(boardid,pageNum,limit,column,find);
+	    /*
+	       maxpage:필요한 페이지 갯수.
+	       게시물건수  필요한 페이지
+	          3        1
+	               3.0/10 => 0.3+0.95=>(int)1.25 => 1
+	         10        1
 		               10.0/10 => 1.0+0.95=>(int)1.95 => 1
-		         11        2
+	         11        2
 		               11.0/10 => 1.1+0.95=>(int)2.05 => 2
-		        500        50
+	        500        50
 		               500.0/10 => 50.0+0.95=>(int)50.95 => 50
-		        501        51
+	        501        51
 		               501.0/10 => 50.1+0.95=>(int)51.05 => 51
-		    */
-		    int maxpage = (int)((double)boardcount/limit + 0.95);
-		    /*
-		     startpage: 화면에 출력될 시작 페이지 
+	    */
+	    int maxpage = (int)((double)boardcount/limit + 0.95);
+	    /*
+	     startpage: 화면에 출력될 시작 페이지 
 		      현재페이지    시작페이지
 		          1          1
 		            1/10.0 => 0.1 + 0.9 => 1.0 -1 => 0 *10 + 1 => 1
@@ -164,7 +180,7 @@ public class BoardController extends MskimRequestMapping {
 		    request.setAttribute("pageNum", pageNum);
 		    request.setAttribute("boardnum", boardnum);
 		    request.setAttribute("list", list);
-		    request.setAttribute("startpage", endpage);
+		    request.setAttribute("startpage", startpage);
 		    request.setAttribute("endpage", endpage);
 		    request.setAttribute("maxpage", maxpage);
 		    request.setAttribute("today", new Date());
@@ -216,7 +232,6 @@ public class BoardController extends MskimRequestMapping {
 	public String replyForm (HttpServletRequest request,
 			HttpServletResponse response) {
 		int num = Integer.parseInt(request.getParameter("num"));//파라미터값읽기
-		BoardDao dao = new BoardDao();
 		Board board = dao.selectOne(num);  //원글 정보	
 		request.setAttribute("board", board);
 		return "board/replyForm";

@@ -5,9 +5,36 @@
 <%-- /jspstudy2/src/main/webapp/view/board/list.jsp--%>
 <!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>게시물 목록 보기</title>
+<script type="text/javascript">
+    function listsubmit(page) {
+    	f = document.sf;  //검색 form 태그
+    	f.pageNum.value=page;
+    	f.submit();
+    }
+</script>    
 </head><body>
 <div class="w3-container">
-<h2>${boardName}</h2>
+<h2 class="w3-center">${boardName}</h2>
+
+<div  class="w3-container w3-center">
+<form  action="list?boardid=${boardid}"  method="post" name="sf">
+   <input type="hidden" name="pageNum" value="1" >
+   <select  class="w3-select" name="column" >
+     <option value="" >선택하시오</option>
+     <option value="writer" >글쓴이</option>
+	 <option value="title">제목</option>
+	 <option value="content">내용</option>
+     <option value="title,writer">제목+작성자</option>
+     <option value="title,content">제목+내용</option>
+     <option value="writer,content">작성자+내용</option>
+     <option value="title,writer,content">제목+작성자+내용</option></select>
+     <script type="text/javascript">
+         document.sf.column.value='${param.column}'
+     </script>
+	 <input class="w3-input" type="text"
+	   placeholder="Search" name="find" value="${param.find}">
+	<button class="btn btn-border" type="submit">Search</button>
+</form></div><p>
 <table class="w3-table-all">
  <c:if test="${boardcount == 0}"> 
  <tr><td colspan="5">등록된 게시글이 없습니다.</td></tr>
@@ -55,17 +82,17 @@
  <tr><td colspan="5" class="w3-center">
       <c:if test="${pageNum <= 1}">[이전]</c:if>
       <c:if test="${pageNum > 1}">
-      <a href="list?pageNum=${pageNum}">[이전]</a>
+      <a href="javascript:listsubmit(${pageNum-1})">[이전]</a>
       </c:if>
       <c:forEach var="a" begin="${startpage}" end="${endpage}">
         <c:if test="${a == pageNum}">[${a}]</c:if>
         <c:if test="${a != pageNum}">
-          <a href="list?pageNum=${a}">[${a}]</a>
+          <a href="javascript:listsubmit(${a})">[${a}]</a>
         </c:if>
       </c:forEach>
       <c:if test="${pageNum >= maxpage}">[다음]</c:if>
       <c:if test="${pageNum < maxpage}">
-      <a href="list?pageNum=${pageNum + 1}">[다음]</a>
+      <a href="javascript:listsubmit(${pageNum+1})">[다음]</a>
       </c:if>
  </td></tr>  
 </c:if>
