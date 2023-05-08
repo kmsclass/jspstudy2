@@ -87,6 +87,24 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <header class="w3-container" style="padding-top:22px">
     <h5><b>공공데이터 융합 자바/스프링 개발자 양성과정(GDJ62)</b></h5>
   </header>
+  <div class="w3-row-padding w3-margin-bottom">
+     <div class="w3-half">
+       <div class="w3-container w3-padding-16">
+         <div id="piecontainer" 
+                  style="width:80%; border:1px solid #ffffff">
+            <canvas id="canvas1" style="width:100%"></canvas>      
+         </div>
+       </div>
+     </div>
+     <div class="w3-half">
+       <div class="w3-container w3-padding-16">
+         <div id="barontainer" 
+                  style="width:80%; border:1px solid #ffffff">
+            <canvas id="canvas2" style="width:100%"></canvas>      
+         </div>
+       </div>
+     </div>
+  </div>
   <div class="w3-panel">
     <sitemesh:write property="body"/>
   </div>
@@ -136,8 +154,21 @@ function w3_close() {
   overlayBg.style.display = "none";
 }
 </script>
+<script type="text/javascript" 
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 <script type="text/javascript">
+  let randomColorFactor = function() {
+	  return Math.round(Math.random() * 255)
+  }
+  let randomColor = function(opa) {
+	  return "rgba(" + randomColorFactor() + ","
+			  + randomColorFactor() + ","
+			  + randomColorFactor() + "," 
+			  + (opa || '.3') + ")"
+  }
   $(function(){ 
+	  piegraph()  //작성자별 게시물 등록 건수
+	  bargraph()  //작성일자별 게시물 등록 건수
 	  //ajax을 이용하여 환율 데이터 조회하기
 	  exchangeRate();
 	  //ajax을 이용하여 시도 데이터를 조회하기	  
@@ -160,6 +191,111 @@ function w3_close() {
 		  }
 	  })
   })
+  function  piegraph() {
+	  //url : "${path}/ajax/graph1" => 서버요청 url
+	    $.ajax("${path}/ajax/graph1",{
+	    	success : function(data) {
+	    		//data : 서버에서 응답한 데이터
+	    		//[{"cnt":7,"writer":"홍길동"},...]
+	    		pieGraphPrint(data);
+	    	},
+	    	error : function(e) {
+	    		alert("서버오류:"+e.status)
+	    	}
+	    })
+  }
+  function bargraph() {
+	    $.ajax("${path}/ajax/graph2",{
+	    	success : function(data) {
+	    		barGraphPrint(data);
+	    	},
+	    	error : function(e) {
+	    		alert("서버오류:"+e.status)
+	    	}
+	    })
+	  
+  }
+  function pieGraphPrint(data) {
+	  console.log(data) //[{writer:'이름1',cnt:갯수},....]
+	  //rows : JSON 객체. 배열객체
+	  let rows = JSON.parse(data)
+	  let writers = []  //x축의 내용
+	  let datas = []
+	  let colors = []
+	  $.each(rows,function(i,item){
+		  writers[i] = item.writer
+		  datas[i] = item.cnt
+		  colors[i] = randomColor(1);
+	  })
+	  let config = {
+		  type : 'pie',
+		  data : {
+			  datasets : [{
+				  data : datas,
+				  backgroundColor : colors
+			  }],
+			  labels : writers
+		  },
+		  options : {
+			  responsive : true,
+			  legend : {position : 'top'},
+			  title : {
+				  display : true,
+				  text : '게시물 작성자별 등록 건수',
+				  position : "bottom"
+			  }
+		  }
+	  }
+	  let ctx = document.getElementById("canvas1").getContext("2d")
+	  new Chart(ctx,config)
+  }
+  function barGraphPrint(data){
+	  console.log(data)
+	  //[{"regdate":"2023-04-07","cnt":8},
+	  // {"regdate":"2023-04-06","cnt":10},...]
+	  let rows = JSON.parse(data)
+	  let regdates = []
+	  let datas = []
+	  let colors = []
+	  $.each(rows,function(i,item){
+		  regdates[i]=item.regdate
+		  datas[i]=item.cnt
+		  colors[i] = randomColor(1)
+	  })
+	  let chartData = {
+		  labels : regdates,
+		  datasets : [{
+			  type : "line",
+			  borderWidth : 2,
+			  borderColor:colors,
+			  label :'건수',
+			  fill:false,
+			  data : datas
+		  },{
+			  type : 'bar',
+			  label : '건수',
+			  backgroundColor : colors,
+			  data : datas
+		  }]
+	  }
+	  let config = {
+		  type : 'bar',
+		  data : chartData,
+		  options : {
+			  responsive : true,
+			  title : {display : true,
+				  text : '최근 7일 게시판 등록건수',
+				  position : 'bottom'},
+			  legend : {display : false},
+			  scales : {
+				  xAxes : [{display : true, stacked:true}],
+				  yAxes : [{display : true, stacked:true}]
+			  }
+		  }
+	  }
+	  let ctx = document.getElementById("canvas2").getContext("2d")
+	  new Chart(ctx,config)
+  }
   function getText(name) { //si : 시도 선택, gu:구군 선택
 	let city = $("select[name='si']").val()
 	let gun = $("select[name='gu']").val()
